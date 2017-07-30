@@ -1,4 +1,5 @@
 .idea/
 saved_model/
 *.p
+*.pyc
 testOpenAI.py
