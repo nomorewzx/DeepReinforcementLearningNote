@@ -1,5 +1,9 @@
 """
-This model will take around 5300 episodes to compete with its opponent. And I trained this model on Mac Pro 15 Inch (16G RAM, Core i7) about 12 hours.
+This model's loss function and initializer is built up by referring greydanus's implementation,
+see: https://gist.github.com/greydanus/5036f784eec2036252e1990da21eda18
+
+This model will take around 5300 episodes to compete with its opponent.
+And I trained this model on Mac Pro 15 Inch (16G RAM, Core i7) about 12 hours.
 """
 import numpy as np
 import tensorflow as tf
