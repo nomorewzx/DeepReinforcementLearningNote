@@ -143,7 +143,7 @@ with tf.Session(graph=graph) as session:
             episode_labels = np.array(one_hot_action_list, dtype=np.float32)
             episode_statuses = np.array(input_status_list, dtype=np.float32)
 
-            feed_dict = {input_statuses: input_status_list, rewards: episode_discounted_rewards, labels: episode_labels}
+            feed_dict = {input_statuses: input_status_list, discounted_rewards: episode_discounted_rewards, rewards: episode_rewards, labels: episode_labels}
 
             _, loss_train, logits_train, global_step_train, summary_op_train = session.run([train_op, loss, logits, global_step, summary_op], feed_dict=feed_dict)
             print("Resetting env. episode reward total was %f . Loss is %f" % (reward_sum, loss_train))
