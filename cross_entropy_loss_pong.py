@@ -51,7 +51,7 @@ def build_loss_func(logits, rewards):
     # 此时loss 为向量/矩阵，经过求和操作，可得到一个实数, 如下:
     # loss = sum(loss)
 
-    advantaged_cross_entropy = (-tf.multiply(labels, tf.log(logits))) * rewards
+    advantaged_cross_entropy = (-tf.multiply(labels, tf.log(tf.clip_by_value(logits, 1e-10, 1.0)))) * rewards
     loss = tf.reduce_sum(advantaged_cross_entropy)
 
     return loss
