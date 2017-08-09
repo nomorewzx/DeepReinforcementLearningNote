@@ -2,12 +2,13 @@
 """
 Add summary for pong model, and change loss func to log prob.
 """
+import os
+
+import gym
 import numpy as np
 import tensorflow as tf
-import cPickle as pickle
+
 import pong_utils
-import gym
-import os
 
 HIDDEN_LAYER_COUNTS = 200
 LEARNING_RATE = 1e-3
@@ -27,9 +28,9 @@ DECAY = 0.99
 
 ACTION_SPACE = [STILL, MOVE_UP, MOVE_DOWN]
 
-CHECK_POINT_DIR = "saved_model_cross_entropy_loss/"
+CHECK_POINT_DIR = "../saved_model_cross_entropy_loss/"
 
-SUMMARY_DIR = "summary/cross_entropy_loss/"
+SUMMARY_DIR = "../summary/cross_entropy_loss/"
 
 graph = tf.Graph()
 

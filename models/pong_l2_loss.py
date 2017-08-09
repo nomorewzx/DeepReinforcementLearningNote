@@ -5,12 +5,13 @@ see: https://gist.github.com/greydanus/5036f784eec2036252e1990da21eda18
 This model will take around 5300 episodes to compete with its opponent.
 And I trained this model on Mac Pro 15 Inch (16G RAM, Core i7) about 12 hours.
 """
+import os
+
+import gym
 import numpy as np
 import tensorflow as tf
-import cPickle as pickle
+
 import pong_utils
-import gym
-import os
 
 HIDDEN_LAYER_COUNTS = 200
 LEARNING_RATE = 1e-3
@@ -30,9 +31,9 @@ DECAY = 0.99
 
 ACTION_SPACE = [STILL, MOVE_UP, MOVE_DOWN]
 
-CHECKPOINT_DIR = "saved_model/"
+CHECKPOINT_DIR = "../saved_model/"
 
-SUMMARY_DIR = "summary/l2_loss/"
+SUMMARY_DIR = "../summary/l2_loss/"
 
 graph = tf.Graph()
 with graph.as_default():

@@ -15,7 +15,7 @@ render = True
 # model initialization
 D = 80 * 80  # input dimensionality: 80x80 grid
 if resume:
-    model = pickle.load(open('save.p', 'rb'))
+    model = pickle.load(open('../save.p', 'rb'))
 else:
     model = {}
     model['W1'] = np.random.randn(H, D) / np.sqrt(D)  # "Xavier" initialization

@@ -4,4 +4,3 @@ saved_model/
 *.pyc
 summary/
 saved_model_cross_entropy_loss/
-testOpenAI.py
