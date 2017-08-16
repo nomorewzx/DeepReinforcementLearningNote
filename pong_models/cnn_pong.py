@@ -26,14 +26,12 @@ with graph.as_default():
 
     with tf.variable_scope("cnn_layer1") as scope:
         images = tf.reshape(input_list, shape=[-1, 80, 80, 1])
-        filters = tf.get_variable("weights", shape=[5,5,1,10], initializer= tf.contrib.layers.xavier_initializer_conv2d())
-
-        biases = tf.get_variable("biases", shape= [10], initializer= tf.random_normal_initializer())
-
+        filters = tf.get_variable("weights", shape=[5,5,1,10],
+                                  dtype= tf.float32, initializer= tf.contrib.layers.xavier_initializer_conv2d())
         logits = tf.nn.conv2d(images, filters, strides=[1,1,1,1],
                               padding='SAME', name="cnn_layer_1_conv")
 
-        activated_logits = tf.nn.relu(logits + biases, name= scope.name)
+        activated_logits = tf.nn.relu(logits, name= scope.name)
 
         conv1_output = tf.nn.max_pool(activated_logits, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding="SAME")
 
@@ -41,53 +39,44 @@ with graph.as_default():
         weights = tf.get_variable("weights", shape=[5,5,10,10], dtype=tf.float32,
                                   initializer= tf.contrib.layers.xavier_initializer_conv2d())
 
-        biases = tf.get_variable("biases", shape= [10], initializer= tf.random_normal_initializer())
-
         logits = tf.nn.conv2d(conv1_output, weights, strides=[1,1,1,1],
                               padding="SAME", name="cnn_layer2_conv")
 
-        activated_logits = tf.nn.relu(logits + biases)
+        activated_logits = tf.nn.relu(logits)
 
         conv2_output = tf.nn.max_pool(activated_logits, ksize=[1,2,2,1], strides=[1,2,2,1], padding="SAME")
 
     with tf.variable_scope("fc_nn_hidden_layer") as fc_nn_hidden:
         input_features_dim = 20 * 20 * 10
 
-        weights = tf.get_variable("weights", shape=[input_features_dim, FC_NN_HIDDEN_COUNTS],
-                                  initializer= tf.truncated_normal_initializer(mean= 0.0, stddev= 1/np.sqrt(input_features_dim)))
-
-        biases = tf.get_variable("biases", shape=[FC_NN_HIDDEN_COUNTS],
-                                 initializer= tf.zeros_initializer())
+        weights = tf.get_variable("weights", dtype= tf.float32,
+                                  shape=[input_features_dim, FC_NN_HIDDEN_COUNTS], initializer= tf.contrib.layers.xavier_initializer())
 
         flatten_conv2_output = tf.reshape(conv2_output, shape=[-1, input_features_dim])
 
-        hidden_layer_relu = tf.nn.relu(tf.matmul(flatten_conv2_output, weights) + biases)
+        hidden_layer_relu = tf.nn.relu(tf.matmul(flatten_conv2_output, weights))
 
         hidden_layer_output = tf.nn.dropout(hidden_layer_relu, keep_prob= 0.75, name="drop_out")
 
     with tf.variable_scope("fc_nn_output_layer") as fc_nn_output_layer:
-        weights = tf.get_variable("weights", shape=[FC_NN_HIDDEN_COUNTS, ACTION_SPACE_SIZE],
-                                  initializer= tf.truncated_normal_initializer(mean= 0.0, stddev= 1/np.sqrt(FC_NN_HIDDEN_COUNTS)))
+        weights = tf.get_variable("weights", dtype= tf.float32,
+                                  shape=[FC_NN_HIDDEN_COUNTS, ACTION_SPACE_SIZE],
+                                  initializer= tf.contrib.layers.xavier_initializer())
 
-        biases = tf.get_variable("biases", shape=[ACTION_SPACE_SIZE],
-                                 initializer= tf.zeros_initializer())
-
-        logits = tf.matmul(hidden_layer_output, weights) + biases
+        logits = tf.matmul(hidden_layer_output, weights)
 
         action_probs = tf.nn.softmax(logits)
 
-    with tf.variable_scope("loss") as loss_scope:
-        loss = tf.reduce_mean(-discounted_rewards *
-                             labels *
-                             tf.log(tf.clip_by_value(action_probs, clip_value_min=1e-40, clip_value_max= 1.0)))
 
-        optimizer = tf.train.RMSPropOptimizer(learning_rate= LEARNING_RATE, decay= DECAY).minimize(loss, global_step= global_step)
+    advantaged_cross_entropy = (-tf.multiply(labels, tf.log(tf.clip_by_value(action_probs, 1e-40, 1.0)))) * discounted_rewards
+    loss = tf.reduce_mean(advantaged_cross_entropy)
 
-    with tf.variable_scope("summary") as scope:
-        loss_summary = tf.summary.scalar("loss", loss)
-        reward_summary = tf.summary.scalar("reward", tf.reduce_sum(rewards))
+    optimizer = tf.train.RMSPropOptimizer(learning_rate= LEARNING_RATE, decay= DECAY).minimize(loss, global_step= global_step)
 
-        summary_op = tf.summary.merge_all()
+    loss_summary = tf.summary.scalar("loss", loss)
+    reward_summary = tf.summary.scalar("reward", tf.reduce_sum(rewards))
+
+    summary_op = tf.summary.merge_all()
 
 with tf.Session(graph= graph) as session:
 
