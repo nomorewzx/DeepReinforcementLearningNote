@@ -52,7 +52,7 @@ def build_loss_func(logits, rewards):
     # 此时loss 为向量/矩阵，经过求和操作，可得到一个实数, 如下:
     # loss = sum(loss)
 
-    advantaged_cross_entropy = (-tf.multiply(labels, tf.log(tf.clip_by_value(logits, 1e-10, 1.0)))) * rewards
+    advantaged_cross_entropy = (-tf.multiply(labels, tf.log(tf.clip_by_value(logits, 1e-1000, 1.0)))) * rewards
     loss = tf.reduce_sum(advantaged_cross_entropy)
 
     return loss
@@ -140,7 +140,7 @@ with tf.Session(graph=graph) as session:
             pong_env.render()
 
         # 将游戏整盘面处理为只包含重点区域，且为灰度图的新图像
-        current_status = pong_utils.preprocessing_observation_of_pong(observation)
+        current_status = pong_utils.preprocessing_and_flatten_observation(observation)
 
         # 将当前 status 与 之前的status取差值，以使模型能观测到两次status之间局势的变化
         if prev_status is not None:

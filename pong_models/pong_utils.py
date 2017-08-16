@@ -1,6 +1,11 @@
 import numpy as np
 
-def preprocessing_observation_of_pong(observation):
+ACTION_SPACE_SIZE = 3
+
+def preprocessing_and_flatten_observation(observation):
+    return preprocessing_observation(observation).ravel()
+
+def preprocessing_observation(observation):
     observation_game_court = observation[35:195,:,:]
 
     down_sample_game_court = observation_game_court[::2, ::2, 0]
@@ -14,8 +19,7 @@ def preprocessing_observation_of_pong(observation):
     # normalize pong and agent pixels to 1 ?
     down_sample_game_court[down_sample_game_court != 0] = 1
 
-    return down_sample_game_court.astype(np.float).ravel()
-
+    return down_sample_game_court.astype(np.float)
 
 def discounted_rewards(reward_list, gamma):
     discounted_rewards = np.zeros_like(reward_list)
@@ -28,3 +32,12 @@ def discounted_rewards(reward_list, gamma):
         discounted_rewards[t] = running_add
 
     return discounted_rewards
+
+
+def poll_action_index_from_action_probs(probs):
+    assert type(probs) == np.ndarray
+    assert len(probs) == ACTION_SPACE_SIZE
+
+    action_index = np.random.choice(3,p= probs)
+
+    return action_index

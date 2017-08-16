@@ -96,7 +96,7 @@ with tf.Session(graph=graph) as session:
     while True:
         if RENDER:
             pong_env.render()
-        current_status = pong_utils.preprocessing_observation_of_pong(observation)
+        current_status = pong_utils.preprocessing_and_flatten_observation(observation)
 
         if prev_status is not None:
             status = current_status - prev_status
